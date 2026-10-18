@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Comercial Porsche - Executive Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        porsche: {
+                            black: '#0a0a0a',
+                            card: '#141414',
+                            hover: '#1e1e1e',
+                            border: '#2a2a2a',
+                            orange: '#FF5500',
+                            orangeHover: '#E04800',
+                            orangeGlow: 'rgba(255, 85, 0, 0.2)',
+                            grayText: '#8E8E93',
+                            lightText: '#F2F2F7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom scrollbar for clean dark UI */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #FF5500;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.95) 100%), 
+                        url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?q=80&w=2000&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .glass-card {
+            background: rgba(20, 20, 20, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .orange-glow {
+            box-shadow: 0 0 20px rgba(255, 85, 0, 0.25);
+        }
+    </style>
+</head>
+<body class="bg-porsche-black text-porsche-lightText font-sans min-h-screen pb-12 antialiased selection:bg-porsche-orange selection:text-white">
+
+    <!-- Hero Banner Header -->
+    <header class="relative hero-bg border-b border-porsche-border">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-16">
+            <div class="flex justify-between items-start mb-6">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-porsche-orange/10 border border-porsche-orange/30 text-porsche-orange text-xs font-semibold uppercase tracking-wider">
+                    <span class="w-2 h-2 rounded-full bg-porsche-orange animate-pulse"></span>
+                    <span>Relatório de Performance Comercial</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs bg-porsche-orange/20 text-porsche-orange px-2.5 py-1 rounded-md font-mono border border-porsche-orange/30">
+                        <i class="fa-solid fa-brain mr-1"></i> Gemini AI Active
+                    </span>
+                    <button onclick="resetFilters()" class="text-xs text-porsche-grayText hover:text-white transition flex items-center space-x-1 bg-porsche-card px-3 py-1.5 rounded-lg border border-porsche-border">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span>Atualizar Dados</span>
+                    </button>
+                </div>
+            </div>
+            
+            <h1 class="text-3xl md:text-5xl lg:text-6xl font-black tracking-tight text-white mb-4 leading-tight max-w-4xl">
+                Performance comercial com <span class="text-transparent bg-clip-text bg-gradient-to-r from-porsche-orange to-amber-500">precisão esportiva.</span>
+            </h1>
+            <p class="text-base md:text-lg text-porsche-grayText max-w-2xl leading-relaxed">
+                Dashboard executivo inteligente com assistente IA integrado para analisar tendências de modelos por estado e oportunidades no mix comercial.
+            </p>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10 space-y-8">
+
+        <!-- Barra de Filtros Interativos -->
+        <section class="bg-porsche-card border border-porsche-border rounded-2xl p-6 shadow-2xl">
+            <div class="flex items-center justify-between mb-4 border-b border-porsche-border pb-3">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-filter text-porsche-orange text-sm"></i>
+                    <h3 class="text-xs font-bold uppercase tracking-wider text-white">Filtros de Pesquisa</h3>
+                </div>
+                <button onclick="resetFilters()" class="text-xs text-porsche-orange hover:underline font-semibold flex items-center space-x-1">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>Limpar Filtros</span>
+                </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-porsche-grayText mb-2">Modelo da Porsche</label>
+                    <select id="filterModel" onchange="applyFilters()" class="w-full bg-porsche-black border border-porsche-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-porsche-orange transition">
+                        <option value="ALL">Todos os Modelos</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-porsche-grayText mb-2">Model Year (Ano)</label>
+                    <select id="filterYear" onchange="applyFilters()" class="w-full bg-porsche-black border border-porsche-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-porsche-orange transition">
+                        <option value="ALL">Todos os Anos</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-porsche-grayText mb-2">Estado (State)</label>
+                    <select id="filterState" onchange="applyFilters()" class="w-full bg-porsche-black border border-porsche-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-porsche-orange transition">
+                        <option value="ALL">Todos os Estados</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold uppercase tracking-wider text-porsche-grayText mb-2">Forma de Pagamento</label>
+                    <select id="filterPayment" onchange="applyFilters()" class="w-full bg-porsche-black border border-porsche-border rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-porsche-orange transition">
+                        <option value="ALL">Todas as Formas</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- KPI Cards Summary -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-porsche-card border border-porsche-border rounded-2xl p-5 relative overflow-hidden">
+                <div class="text-[11px] font-bold text-porsche-grayText uppercase tracking-wider mb-1">Vendas Filtradas</div>
+                <div class="text-3xl font-black text-white" id="kpiSalesCount">0</div>
+                <div class="text-xs text-porsche-grayText mt-1" id="kpiStatesCount">0 estado(s) no recorte</div>
+            </div>
+
+            <div class="bg-porsche-card border border-porsche-border rounded-2xl p-5 relative overflow-hidden">
+                <div class="text-[11px] font-bold text-porsche-grayText uppercase tracking-wider mb-1">Receita Total</div>
+                <div class="text-3xl font-black text-porsche-orange" id="kpiTotalRevenue">R$ 0</div>
+                <div class="text-xs text-porsche-grayText mt-1" id="kpiAvgTicket">Ticket médio R$ 0</div>
+            </div>
+
+            <div class="bg-porsche-card border border-porsche-border rounded-2xl p-5 relative overflow-hidden">
+                <div class="text-[11px] font-bold text-porsche-grayText uppercase tracking-wider mb-1">Modelo Líder</div>
+                <div class="text-xl font-bold text-white truncate" id="kpiTopModel">-</div>
+                <div class="text-xs text-porsche-grayText mt-1" id="kpiTopModelStats">0 vendas, 0%</div>
+            </div>
+
+            <div class="bg-porsche-card border border-porsche-border rounded-2xl p-5 relative overflow-hidden">
+                <div class="text-[11px] font-bold text-porsche-grayText uppercase tracking-wider mb-1">Ano Dominante</div>
+                <div class="text-xl font-bold text-white" id="kpiDominantYear">-</div>
+                <div class="text-xs text-porsche-grayText mt-1" id="kpiDominantYearStats">0 vendas, 0%</div>
+            </div>
+        </div>
+
+        <!-- Leitura Executiva / Highlight Banner com Integração IA -->
+        <section class="bg-gradient-to-r from-porsche-card via-porsche-hover to-porsche-card border border-porsche-orange/30 rounded-2xl p-6 relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-60 h-60 bg-porsche-orange/10 rounded-full blur-3xl pointer-events-none"></div>
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
+                <div class="space-y-2 max-w-3xl">
+                    <div class="flex items-center space-x-2 text-porsche-orange font-bold text-xs uppercase tracking-widest">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>Leitura Executiva IA & Insights</span>
+                    </div>
+                    <h2 class="text-xl font-bold text-white" id="executiveTitle">Análise de Performance Operacional</h2>
+                    <p class="text-sm text-porsche-grayText leading-relaxed" id="executiveSummary">
+                        Carregando insights dinâmicos da frota e performance das regionais...
+                    </p>
+                </div>
+                <div class="flex flex-col items-end gap-3 flex-shrink-0 w-full md:w-auto">
+                    <button onclick="generateAIExecutiveInsight()" id="aiInsightBtn" class="w-full md:w-auto bg-gradient-to-r from-porsche-orange to-amber-600 hover:opacity-90 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition flex items-center justify-center space-x-2 shadow-lg shadow-porsche-orange/20 border border-porsche-orange/40">
+                        <i class="fa-solid fa-sparkles"></i>
+                        <span id="aiBtnText">Gerar Insight Executivo IA</span>
+                    </button>
+                    <div class="bg-porsche-black/60 backdrop-blur border border-porsche-border rounded-xl p-3 text-center min-w-[200px] w-full">
+                        <div class="text-[11px] text-porsche-grayText font-semibold">Conversão de Vendas</div>
+                        <div class="text-xl font-black text-porsche-orange mt-0.5" id="kpiConversionRate">84.2%</div>
+                        <div class="text-[10px] text-green-400 mt-0.5"><i class="fa-solid fa-caret-up"></i> +4.1% vs período anterior</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção do Assistente Virtual Gemini AI Chat Copilot -->
+        <section class="bg-porsche-card border border-porsche-orange/40 rounded-2xl p-6 shadow-2xl relative">
+            <div class="flex items-center justify-between mb-4 border-b border-porsche-border pb-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-porsche-orange/20 border border-porsche-orange/40 flex items-center justify-center text-porsche-orange">
+                        <i class="fa-solid fa-robot text-lg"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-white">Porsche Commercial Copilot (Gemini AI)</h3>
+                        <p class="text-xs text-porsche-grayText">Faça perguntas diretas sobre as vendas, modelos ou estratégias regionais</p>
+                    </div>
+                </div>
+                <span class="text-[10px] text-porsche-orange bg-porsche-orange/10 border border-porsche-orange/30 px-2 py-1 rounded-md font-mono">
+                    gemini-3-flash-preview
+                </span>
+            </div>
+
+            <div id="aiChatHistory" class="bg-porsche-black/80 border border-porsche-border rounded-xl p-4 h-48 overflow-y-auto space-y-3 mb-4 text-xs">
+                <div class="bg-porsche-hover border border-porsche-border p-3 rounded-lg text-porsche-lightText max-w-xl">
+                    <span class="text-porsche-orange font-bold block mb-1"><i class="fa-solid fa-brain mr-1"></i> Gemini AI:</span>
+                    Olá! Sou seu assistente de inteligência comercial. Posso responder dúvidas estratégicas sobre o portfólio Porsche com base nos filtros atuais ou tendências de mercado. Como posso ajudar?
+                </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+                <input type="text" id="aiUserQuery" onkeypress="handleChatKeyPress(event)" placeholder="Ex: Qual modelo tem o maior ticket em SP e qual estratégia adotar?" class="flex-1 bg-porsche-black border border-porsche-border rounded-xl px-4 py-3 text-xs text-white placeholder-porsche-grayText focus:outline-none focus:border-porsche-orange transition">
+                <button onclick="sendCopilotMessage()" id="aiSendBtn" class="bg-porsche-orange hover:bg-porsche-orangeHover text-white px-5 py-3 rounded-xl text-xs font-bold transition flex items-center space-x-1 shadow-md">
+                    <span>Enviar</span>
+                    <i class="fa-solid fa-paper-plane ml-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- Dashboard Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            <!-- Pergunta 1: Principais Modelos / Mix de Vendas -->
+            <div class="bg-porsche-card border border-porsche-border rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-porsche-orange uppercase tracking-wider">Pergunta 1</span>
+                        <h3 class="text-lg font-bold text-white">Principais Modelos</h3>
+                    </div>
+                    <span class="text-xs text-porsche-grayText">Mix por Volume</span>
+                </div>
+                <p class="text-xs text-porsche-grayText">Filtre por estado para revelar o mix local; mantenha geral para ver a liderança geral do portfólio.</p>
+                <div class="h-72 w-full pt-2">
+                    <canvas id="chartModels"></canvas>
+                </div>
+            </div>
+
+            <!-- Pergunta 2: Ano de Modelo de Maior Saída -->
+            <div class="bg-porsche-card border border-porsche-border rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-porsche-orange uppercase tracking-wider">Pergunta 2</span>
+                        <h3 class="text-lg font-bold text-white">Ano de Modelo de Maior Saída</h3>
+                    </div>
+                    <span class="text-xs text-porsche-grayText">Model Year</span>
+                </div>
+                <p class="text-xs text-porsche-grayText">Distribuição do volume de vendas por Model Year no recorte selecionado.</p>
+                <div class="h-72 w-full pt-2">
+                    <canvas id="chartYears"></canvas>
+                </div>
+            </div>
+
+            <!-- Pergunta 3: Venda por State (Estado) -->
+            <div class="bg-porsche-card border border-porsche-border rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-porsche-orange uppercase tracking-wider">Pergunta 3</span>
+                        <h3 class="text-lg font-bold text-white">Vendas por Estado (State)</h3>
+                    </div>
+                    <span class="text-xs text-porsche-grayText">Geográfico</span>
+                </div>
+                <p class="text-xs text-porsche-grayText">Top estados com maior penetração em receita e unidades vendidas.</p>
+                <div class="h-72 w-full pt-2">
+                    <canvas id="chartStates"></canvas>
+                </div>
+            </div>
+
+            <!-- Pergunta 4: Receita por Método de Pagamento -->
+            <div class="bg-porsche-card border border-porsche-border rounded-2xl p-6 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-porsche-orange uppercase tracking-wider">Pergunta 4</span>
+                        <h3 class="text-lg font-bold text-white">Forma de Pagamento</h3>
+                    </div>
+                    <span class="text-xs text-porsche-grayText">Financiamento vs À Vista</span>
+                </div>
+                <p class="text-xs text-porsche-grayText">Divisão do comportamento de compra e liquidez dos clientes.</p>
+                <div class="h-72 w-full pt-2">
+                    <canvas id="chartPayments"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Tabela Detalhada de Transações -->
+        <section class="bg-porsche-card border border-porsche-border rounded-2xl overflow-hidden shadow-xl">
+            <div class="p-6 border-b border-porsche-border flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h3 class="text-lg font-bold text-white">Detalhamento das Operações</h3>
+                    <p class="text-xs text-porsche-grayText">Listagem analítica individual de vendas e receitas agregadas</p>
+                </div>
+                <div class="text-xs text-porsche-orange font-semibold bg-porsche-orange/10 px-3 py-1.5 rounded-lg border border-porsche-orange/20">
+                    <span id="tableRecordCount">0</span> registros encontrados
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-porsche-black/80 text-porsche-grayText uppercase font-semibold tracking-wider border-b border-porsche-border">
+                        <tr>
+                            <th class="py-3.5 px-6">Modelo</th>
+                            <th class="py-3.5 px-6">Ano (Model Year)</th>
+                            <th class="py-3.5 px-6">Estado (State)</th>
+                            <th class="py-3.5 px-6">Pagamento</th>
+                            <th class="py-3.5 px-6 text-right">Valor da Venda</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody" class="divide-y divide-porsche-border text-porsche-lightText">
+                        <!-- Transações inseridas via JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 text-center text-xs text-porsche-grayText">
+        <p>© 2026 Porsche Commercial Analytics. Painel Gerencial Interativo de Alta Performance.</p>
+    </footer>
+
+    <script>
+        // Data Set Simulado & Produtivo baseado no domínio Porsche
+        const rawSalesData = [
+            // Cayenne Coupe
+            { model: "Cayenne Coupé", year: 2024, state: "SP", payment: "Financiamento Direct", price: 890000 },
+            { model: "Cayenne Coupé", year: 2024, state: "RJ", payment: "À Vista (PIX)", price: 920000 },
+            { model: "Cayenne Coupé", year: 2024, state: "SP", payment: "Financiamento Direct", price: 890000 },
+            { model: "Cayenne Coupé", year: 2024, state: "MG", payment: "Leasing Premium", price: 910000 },
+            { model: "Cayenne Coupé", year: 2023, state: "PR", payment: "Financiamento Direct", price: 820000 },
+            { model: "Cayenne Coupé", year: 2023, state: "SC", payment: "À Vista (PIX)", price: 830000 },
+
+            // 911 Carrera S
+            { model: "911 Carrera S", year: 2024, state: "SP", payment: "À Vista (PIX)", price: 1150000 },
+            { model: "911 Carrera S", year: 2024, state: "SP", payment: "Financiamento Direct", price: 1180000 },
+            { model: "911 Carrera S", year: 2024, state: "RJ", payment: "À Vista (PIX)", price: 1200000 },
+            { model: "911 Carrera S", year: 2023, state: "RS", payment: "Leasing Premium", price: 1080000 },
+            { model: "911 Carrera S", year: 2025, state: "DF", payment: "À Vista (PIX)", price: 1250000 },
+
+            // Taycan GTS
+            { model: "Taycan GTS", year: 2024, state: "SP", payment: "Leasing Premium", price: 780000 },
+            { model: "Taycan GTS", year: 2024, state: "PR", payment: "Financiamento Direct", price: 790000 },
+            { model: "Taycan GTS", year: 2023, state: "SC", payment: "À Vista (PIX)", price: 740000 },
+            { model: "Taycan GTS", year: 2024, state: "MG", payment: "Leasing Premium", price: 800000 },
+
+            // Macan GTS
+            { model: "Macan GTS", year: 2024, state: "SP", payment: "Financiamento Direct", price: 680000 },
+            { model: "Macan GTS", year: 2024, state: "RJ", payment: "Financiamento Direct", price: 690000 },
+            { model: "Macan GTS", year: 2023, state: "MG", payment: "À Vista (PIX)", price: 620000 },
+            { model: "Macan GTS", year: 2024, state: "RS", payment: "Financiamento Direct", price: 670000 },
+            { model: "Macan GTS", year: 2024, state: "BA", payment: "Financiamento Direct", price: 695000 },
+
+            // Panamera 4S
+            { model: "Panamera 4S", year: 2023, state: "SP", payment: "À Vista (PIX)", price: 950000 },
+            { model: "Panamera 4S", year: 2024, state: "DF", payment: "Leasing Premium", price: 990000 },
+            { model: "Panamera 4S", year: 2024, state: "RJ", payment: "Financiamento Direct", price: 980000 },
+
+            // 718 Boxster GTS
+            { model: "718 Boxster GTS", year: 2024, state: "SP", payment: "À Vista (PIX)", price: 650000 },
+            { model: "718 Boxster GTS", year: 2024, state: "SC", payment: "À Vista (PIX)", price: 660000 },
+            { model: "718 Boxster GTS", year: 2023, state: "CE", payment: "Financiamento Direct", price: 610000 },
+            
+            // 911 GT3 RS
+            { model: "911 GT3 RS", year: 2024, state: "SP", payment: "À Vista (PIX)", price: 2100000 },
+            { model: "911 GT3 RS", year: 2024, state: "RJ", payment: "À Vista (PIX)", price: 2150000 },
+            { model: "911 GT3 RS", year: 2025, state: "PR", payment: "À Vista (PIX)", price: 2200000 }
+        ];
+
+        // API Key gerenciada automaticamente no runtime Canvas
+        const GEMINI_API_KEY = "";
+        const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${GEMINI_API_KEY}`;
+
+        // Chamada resiliente à API Gemini com Exponential Backoff
+        async function fetchGeminiAPI(payload, retries = 3, delay = 1000) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const response = await fetch(GEMINI_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                } catch (err) {
+                    // Backoff silencioso
+                }
+                await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+            }
+            throw new Error("Não foi possível conectar ao serviço Gemini AI.");
+        }
+
+        // Gerar leitura analítica refinada do dataset filtrado com Gemini AI
+        async function generateAIExecutiveInsight() {
+            const btn = document.getElementById('aiInsightBtn');
+            const btnText = document.getElementById('aiBtnText');
+            const summaryEl = document.getElementById('executiveSummary');
+
+            const filteredData = getFilteredData();
+            if (filteredData.length === 0) return;
+
+            btn.disabled = true;
+            btnText.innerText = "Analisando com IA...";
+            summaryEl.innerHTML = `<span class="animate-pulse text-porsche-orange"><i class="fa-solid fa-brain mr-1"></i> O Gemini AI está sintetizando o diagnóstico comercial para esta seleção de dados...</span>`;
+
+            const prompt = `Atue como um Diretor Comercial Executivo da Porsche Brasil. Analise o seguinte resumo de dados de vendas filtrados:
+- Total de Veículos Vendidos: ${filteredData.length}
+- Faturamento Total: ${formatCurrency(filteredData.reduce((acc, c) => acc + c.price, 0))}
+- Modelos presentes: ${[...new Set(filteredData.map(d => d.model))].join(', ')}
+- Estados no recorte: ${[...new Set(filteredData.map(d => d.state))].join(', ')}
+- Anos (Model Year): ${[...new Set(filteredData.map(d => d.year))].join(', ')}
+
+Forneça um parágrafo executivo curto, direto, de alto nível, destacando o comportamento do consumidor, lucratividade e uma oportunidade clara de expansão regional.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }],
+                systemInstruction: { parts: [{ text: "Responda de forma executiva, em português do Brasil, elegante e concisa, ideal para relatórios gerenciais automotivos de luxo." }] }
+            };
+
+            try {
+                const data = await fetchGeminiAPI(payload);
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (text) {
+                    summaryEl.innerHTML = `<strong class="text-porsche-orange">[Insights Gemini AI]:</strong> ${text}`;
+                } else {
+                    summaryEl.innerText = "Não foi possível gerar a leitura no momento.";
+                }
+            } catch (err) {
+                summaryEl.innerText = "Erro ao conectar com a inteligência artificial. Tente novamente em instantes.";
+            } finally {
+                btn.disabled = false;
+                btnText.innerText = "Gerar Insight Executivo IA";
+            }
+        }
+
+        // Chatbot / Copilot Interativo com Gemini AI
+        async function sendCopilotMessage() {
+            const input = document.getElementById('aiUserQuery');
+            const history = document.getElementById('aiChatHistory');
+            const sendBtn = document.getElementById('aiSendBtn');
+            const query = input.value.trim();
+
+            if (!query) return;
+
+            // Renderiza mensagem do usuário
+            history.innerHTML += `
+                <div class="bg-porsche-card border border-porsche-orange/30 p-3 rounded-lg text-white ml-auto max-w-xl text-right">
+                    <span class="text-porsche-grayText font-bold block mb-1">Você:</span>
+                    ${query}
+                </div>`;
+            input.value = '';
+            history.scrollTop = history.scrollHeight;
+
+            sendBtn.disabled = true;
+            
+            // Indicador de carregamento
+            const loadingId = `loading-${Date.now()}`;
+            history.innerHTML += `
+                <div id="${loadingId}" class="bg-porsche-hover border border-porsche-border p-3 rounded-lg text-porsche-orange max-w-xl animate-pulse">
+                    <i class="fa-solid fa-spinner fa-spin mr-1"></i> Gemini AI está analisando os dados...
+                </div>`;
+            history.scrollTop = history.scrollHeight;
+
+            const filteredData = getFilteredData();
+            const systemPrompt = `Você é o Copilot Executivo Comercial da Porsche. Você tem acesso direto aos dados da dashboard atual:
+Dados atuais (${filteredData.length} vendas): ${JSON.stringify(filteredData)}
+
+Responda à pergunta do executivo de forma profissional, orientada a dados e negócios automotivos premium. Seja sucinto.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: query }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            try {
+                const data = await fetchGeminiAPI(payload);
+                const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text || "Desculpe, não consegui obter uma resposta adequada.";
+                
+                document.getElementById(loadingId)?.remove();
+                history.innerHTML += `
+                    <div class="bg-porsche-hover border border-porsche-border p-3 rounded-lg text-porsche-lightText max-w-xl">
+                        <span class="text-porsche-orange font-bold block mb-1"><i class="fa-solid fa-brain mr-1"></i> Gemini AI:</span>
+                        ${reply}
+                    </div>`;
+            } catch (err) {
+                document.getElementById(loadingId)?.remove();
+                history.innerHTML += `
+                    <div class="bg-red-900/40 border border-red-500/30 p-3 rounded-lg text-red-200 max-w-xl">
+                        Ocorreu um erro ao consultar o Gemini AI. Verifique a conexão e tente novamente.
+                    </div>`;
+            } finally {
+                sendBtn.disabled = false;
+                history.scrollTop = history.scrollHeight;
+            }
+        }
+
+        function handleChatKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendCopilotMessage();
+            }
+        }
+
+        // Instâncias dos gráficos do Chart.js
+        let chartModelsInstance = null;
+        let chartYearsInstance = null;
+        let chartStatesInstance = null;
+        let chartPaymentsInstance = null;
+
+        // Formatação de valores Monetários
+        const formatCurrency = (val) => {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(val);
+        };
+
+        // Popula as opções nos selects de filtro
+        function populateFilterDropdowns() {
+            const models = [...new Set(rawSalesData.map(d => d.model))].sort();
+            const years = [...new Set(rawSalesData.map(d => d.year))].sort((a,b) => b - a);
+            const states = [...new Set(rawSalesData.map(d => d.state))].sort();
+            const payments = [...new Set(rawSalesData.map(d => d.payment))].sort();
+
+            const modelSelect = document.getElementById('filterModel');
+            models.forEach(m => modelSelect.innerHTML += `<option value="${m}">${m}</option>`);
+
+            const yearSelect = document.getElementById('filterYear');
+            years.forEach(y => yearSelect.innerHTML += `<option value="${y}">${y}</option>`);
+
+            const stateSelect = document.getElementById('filterState');
+            states.forEach(s => stateSelect.innerHTML += `<option value="${s}">${s}</option>`);
+
+            const paySelect = document.getElementById('filterPayment');
+            payments.forEach(p => paySelect.innerHTML += `<option value="${p}">${p}</option>`);
+        }
+
+        // Filtra os dados de acordo com a seleção dos filtros
+        function getFilteredData() {
+            const selectedModel = document.getElementById('filterModel').value;
+            const selectedYear = document.getElementById('filterYear').value;
+            const selectedState = document.getElementById('filterState').value;
+            const selectedPayment = document.getElementById('filterPayment').value;
+
+            return rawSalesData.filter(item => {
+                const matchModel = selectedModel === 'ALL' || item.model === selectedModel;
+                const matchYear = selectedYear === 'ALL' || item.year.toString() === selectedYear;
+                const matchState = selectedState === 'ALL' || item.state === selectedState;
+                const matchPayment = selectedPayment === 'ALL' || item.payment === selectedPayment;
+                return matchModel && matchYear && matchState && matchPayment;
+            });
+        }
+
+        // Reseta todos os filtros para o padrão
+        function resetFilters() {
+            document.getElementById('filterModel').value = 'ALL';
+            document.getElementById('filterYear').value = 'ALL';
+            document.getElementById('filterState').value = 'ALL';
+            document.getElementById('filterPayment').value = 'ALL';
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const filteredData = getFilteredData();
+
+            // Atualiza KPIs
+            const totalSales = filteredData.length;
+            const totalRev = filteredData.reduce((acc, curr) => acc + curr.price, 0);
+            const avgTicket = totalSales > 0 ? totalRev / totalSales : 0;
+            const uniqueStates = new Set(filteredData.map(d => d.state)).size;
+
+            document.getElementById('kpiSalesCount').innerText = totalSales;
+            document.getElementById('kpiStatesCount').innerText = `${uniqueStates} estado(s) no recorte`;
+            document.getElementById('kpiTotalRevenue').innerText = formatCurrency(totalRev);
+            document.getElementById('kpiAvgTicket').innerText = `Ticket médio ${formatCurrency(avgTicket)}`;
+
+            // Cálculo Modelo Líder
+            const modelCounts = {};
+            filteredData.forEach(d => modelCounts[d.model] = (modelCounts[d.model] || 0) + 1);
+            let topModel = "-";
+            let topModelCount = 0;
+            Object.keys(modelCounts).forEach(m => {
+                if (modelCounts[m] > topModelCount) {
+                    topModelCount = modelCounts[m];
+                    topModel = m;
+                }
+            });
+            const topModelShare = totalSales > 0 ? Math.round((topModelCount / totalSales) * 100) : 0;
+            document.getElementById('kpiTopModel').innerText = topModel;
+            document.getElementById('kpiTopModelStats').innerText = `${topModelCount} venda(s), ${topModelShare}%`;
+
+            // Cálculo Ano Dominante
+            const yearCounts = {};
+            filteredData.forEach(d => yearCounts[d.year] = (yearCounts[d.year] || 0) + 1);
+            let dominantYear = "-";
+            let dominantYearCount = 0;
+            Object.keys(yearCounts).forEach(y => {
+                if (yearCounts[y] > dominantYearCount) {
+                    dominantYearCount = yearCounts[y];
+                    dominantYear = y;
+                }
+            });
+            const dominantYearShare = totalSales > 0 ? Math.round((dominantYearCount / totalSales) * 100) : 0;
+            document.getElementById('kpiDominantYear').innerText = dominantYear;
+            document.getElementById('kpiDominantYearStats').innerText = `${dominantYearCount} venda(s), ${dominantYearShare}%`;
+
+            // Atualização da Leitura Executiva Dinâmica
+            updateExecutiveSummary(totalSales, topModel, dominantYear, totalRev, uniqueStates);
+
+            // Renderizar Gráficos e Tabela
+            renderCharts(filteredData);
+            renderTable(filteredData);
+        }
+
+        function updateExecutiveSummary(totalSales, topModel, dominantYear, totalRev, uniqueStates) {
+            const titleEl = document.getElementById('executiveTitle');
+            const summaryEl = document.getElementById('executiveSummary');
+
+            if (totalSales === 0) {
+                titleEl.innerText = "Nenhum Dado Localizado";
+                summaryEl.innerText = "Ajuste os parâmetros de filtro acima para obter uma leitura analítica válida.";
+                return;
+            }
+
+            titleEl.innerText = `Análise de Desempenho Comercial (${totalSales} Unidades)`;
+            summaryEl.innerHTML = `No cenário selecionado, o modelo <strong class="text-white">${topModel}</strong> lidera o portfólio de vendas, sendo o grande acelerador do volume comercial. O ano de fabricação/modelo dominante é <strong class="text-white">${dominantYear}</strong>. O faturamento consolidado atingiu <strong class="text-porsche-orange">${formatCurrency(totalRev)}</strong> distribuído em <strong class="text-white">${uniqueStates} estado(s)</strong> de atuação ativas.`;
+        }
+
+        function renderCharts(data) {
+            // Estilos globais do Chart.js
+            Chart.defaults.color = '#8E8E93';
+            Chart.defaults.font.family = 'Inter';
+
+            // 1. Gráfico de Modelos (Horizontal Bar)
+            const modelMap = {};
+            data.forEach(d => modelMap[d.model] = (modelMap[d.model] || 0) + 1);
+            const modelLabels = Object.keys(modelMap);
+            const modelValues = Object.values(modelMap);
+
+            if (chartModelsInstance) chartModelsInstance.destroy();
+            chartModelsInstance = new Chart(document.getElementById('chartModels'), {
+                type: 'bar',
+                data: {
+                    labels: modelLabels,
+                    datasets: [{
+                        label: 'Unidades Vendidas',
+                        data: modelValues,
+                        backgroundColor: '#FF5500',
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: '#2a2a2a' }, ticks: { stepSize: 1 } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 2. Gráfico de Anos (Doughnut)
+            const yearMap = {};
+            data.forEach(d => yearMap[d.year] = (yearMap[d.year] || 0) + 1);
+            const yearLabels = Object.keys(yearMap).map(y => `Model Year ${y}`);
+            const yearValues = Object.values(yearMap);
+
+            if (chartYearsInstance) chartYearsInstance.destroy();
+            chartYearsInstance = new Chart(document.getElementById('chartYears'), {
+                type: 'doughnut',
+                data: {
+                    labels: yearLabels,
+                    datasets: [{
+                        data: yearValues,
+                        backgroundColor: ['#FF5500', '#E04800', '#B33600', '#802600'],
+                        borderColor: '#141414',
+                        borderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { boxWidth: 12 } }
+                    },
+                    cutout: '70%'
+                }
+            });
+
+            // 3. Gráfico de Estados (Vertical Bar)
+            const stateMap = {};
+            data.forEach(d => stateMap[d.state] = (stateMap[d.state] || 0) + 1);
+            const stateLabels = Object.keys(stateMap);
+            const stateValues = Object.values(stateMap);
+
+            if (chartStatesInstance) chartStatesInstance.destroy();
+            chartStatesInstance = new Chart(document.getElementById('chartStates'), {
+                type: 'bar',
+                data: {
+                    labels: stateLabels,
+                    datasets: [{
+                        label: 'Vendas por UF',
+                        data: stateValues,
+                        backgroundColor: '#333333',
+                        hoverBackgroundColor: '#FF5500',
+                        borderRadius: 6,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: '#2a2a2a' }, ticks: { stepSize: 1 } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+
+            // 4. Gráfico de Métodos de Pagamento (Pie)
+            const payMap = {};
+            data.forEach(d => payMap[d.payment] = (payMap[d.payment] || 0) + 1);
+            const payLabels = Object.keys(payMap);
+            const payValues = Object.values(payMap);
+
+            if (chartPaymentsInstance) chartPaymentsInstance.destroy();
+            chartPaymentsInstance = new Chart(document.getElementById('chartPayments'), {
+                type: 'pie',
+                data: {
+                    labels: payLabels,
+                    datasets: [{
+                        data: payValues,
+                        backgroundColor: ['#FF5500', '#2A2A2A', '#555555'],
+                        borderColor: '#141414',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12 } }
+                    }
+                }
+            });
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('dataTableBody');
+            const recordCount = document.getElementById('tableRecordCount');
+            tbody.innerHTML = '';
+            recordCount.innerText = data.length;
+
+            if (data.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-8 text-center text-porsche-grayText">
+                            Nenhum registro encontrado para os filtros selecionados.
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-porsche-hover/50 transition";
+                tr.innerHTML = `
+                    <td class="py-3.5 px-6 font-semibold text-white">${row.model}</td>
+                    <td class="py-3.5 px-6"><span class="bg-porsche-black px-2 py-1 rounded text-porsche-grayText border border-porsche-border">${row.year}</span></td>
+                    <td class="py-3.5 px-6 font-medium">${row.state}</td>
+                    <td class="py-3.5 px-6">${row.payment}</td>
+                    <td class="py-3.5 px-6 text-right font-bold text-porsche-orange">${formatCurrency(row.price)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Iniciar aplicação ao carregar a página
+        window.onload = function() {
+            populateFilterDropdowns();
+            applyFilters();
+        };
+    </script>
+</body>
+</html>
